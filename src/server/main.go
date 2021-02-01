@@ -34,6 +34,9 @@ func main() {
 	r.HandleFunc("/add-address", middleware.UserAuthRequired(addAddressPostHandler)).Methods("POST")
 	r.HandleFunc("/list-addresses", middleware.UserAuthRequired(listAddressesGetHandler)).Methods("GET")
 	r.HandleFunc("/list-addresses", middleware.UserAuthRequired(listAddressesPostHandler)).Methods("POST")
+	r.HandleFunc("/delete-address", middleware.UserAuthRequired(deleteAddressPostHandler)).Methods("POST")
+	r.HandleFunc("/edit-address", middleware.UserAuthRequired(editAddressPostHandler)).Methods("POST")
+	r.HandleFunc("/update-address", middleware.UserAuthRequired(updateAddressPostHandler)).Methods("POST")
 	r.HandleFunc("/logout", logoutGetHandler).Methods("GET")
 
 	fs := http.FileServer(http.Dir("./static"))
@@ -52,7 +55,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/login", 302)
 		return
 	}
-	http.Redirect(w, r, "/add-address", 302)
+	http.Redirect(w, r, "/list-addresses", 302)
 	return
 }
 
@@ -171,6 +174,49 @@ func listAddressesPostHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func deleteAddressPostHandler(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	id := r.PostForm.Get("id")
+	err := models.DeleteAddress(id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal server error!"))
+		fmt.Println("Register error occured!")
+		return
+	}
+	http.Redirect(w, r, "/list-addresses", 302)
+}
+
+func editAddressPostHandler(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	id := r.PostForm.Get("id")
+	address, _ := models.GetAddress(id)
+	fmt.Println(address.Sokak)
+	templates.ExecuteTemplate(w, "edit-address.html", struct {
+		Address models.Address
+		User    models.User
+	}{
+		Address: address,
+		User:    activeUser,
+	})
+}
+
+func updateAddressPostHandler(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	il := r.PostForm.Get("il")
+	id := r.PostForm.Get("id")
+	ilce := r.PostForm.Get("ilce")
+	mahalle := r.PostForm.Get("mahalle")
+	sokak := r.PostForm.Get("sokak")
+	err := models.UpdateAddress(id, il, ilce, mahalle, sokak)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal server error!"))
+		fmt.Println("Register error occured!")
+		return
+	}
+	http.Redirect(w, r, "/list-addresses", 302)
+}
 func logoutGetHandler(w http.ResponseWriter, r *http.Request) {
 	session, _ := sessions.Store.Get(r, "session")
 	session.Values["username"] = ""

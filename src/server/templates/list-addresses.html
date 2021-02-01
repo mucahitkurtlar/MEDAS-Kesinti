@@ -105,7 +105,7 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {{ range .Addresses }}
+                                            {{ range $x, $y := .Addresses }}
                                             <tr class="tr-shadow">
                                                 <td>
                                                     <label class="au-checkbox">
@@ -113,18 +113,25 @@
                                                         <span class="au-checkmark"></span>
                                                     </label>
                                                 </td>
-                                                <td>{{ .Il }}</td>
-                                                <td>{{ .Ilce }}</td>
-                                                <td>{{ .Mahalle }}</td>
-                                                <td>{{ .Sokak }}</td>
+                                                <td>{{ $y.Il }}</td>
+                                                <td>{{ $y.Ilce }}</td>
+                                                <td>{{ $y.Mahalle }}</td>
+                                                <td>{{ $y.Sokak }}</td>
+
                                                 <td>
                                                     <div class="table-data-feature">
-                                                        <button class="item" data-toggle="tooltip" data-placement="top" title="Edit">
-                                                            <i class="zmdi zmdi-edit"></i>
-                                                        </button>
-                                                        <button class="item" data-toggle="tooltip" data-placement="top" title="Delete">
-                                                            <i class="zmdi zmdi-delete"></i>
-                                                        </button>
+                                                        <form action="/edit-address" method="post">
+                                                            <input type="hidden" name="id" value="{{ $y.ID }}">
+                                                            <button class="item" data-toggle="tooltip" data-placement="top" title="Edit">
+                                                                <i class="zmdi zmdi-edit"></i>
+                                                            </button>
+                                                        </form>
+                                                        <form action="/delete-address" method="post">
+                                                            <input type="hidden" name="id" value="{{ $y.ID }}">
+                                                            <button class="item" data-toggle="tooltip" data-placement="top" title="Delete">
+                                                                <i class="zmdi zmdi-delete"></i>
+                                                            </button>
+                                                        </form>
                                                     </div>
                                                 </td>
                                             </tr>
